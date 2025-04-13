@@ -3,96 +3,342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMI Calculator with Riskometer</title>
+    <title>ChatApp - BMI Calculator</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
             background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 70px;
+            background-color: #fff;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .sidebar-icon {
+            width: 40px;
+            height: 40px;
+            margin: 10px 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-icon:hover {
+            background-color: #f0f2f5;
+        }
+
+        .sidebar-icon.active {
+            background-color: #e8f0fe;
+        }
+
+        .sidebar-icon img {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: #00a884;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .header-icons img {
+            width: 20px;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .content-area.active {
+            display: block;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
             padding: 20px;
         }
-        .calculator-container {
-            background-color: #ffffff;
+
+        .message {
+            max-width: 60%;
+            padding: 8px 12px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.received {
+            background-color: #fff;
+            align-self: flex-start;
+        }
+
+        .message.sent {
+            background-color: #d9fdd3;
+            align-self: flex-end;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f2f5;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            background-color: #fff;
+            outline: none;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            background-color: #00a884;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background-color: #008068;
+        }
+
+        /* BMI Calculator */
+        .bmi-calculator {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 350px;
-            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        h1 {
-            font-size: 24px;
-            color: #333;
+
+        .bmi-calculator h2 {
+            font-size: 20px;
             margin-bottom: 20px;
+            color: #333;
         }
-        label {
+
+        .bmi-calculator label {
             display: block;
+            font-size: 14px;
             margin: 10px 0 5px;
-            font-weight: bold;
             color: #555;
         }
-        input {
+
+        .bmi-calculator input {
             width: 100%;
             padding: 8px;
-            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box;
+            margin-bottom: 10px;
         }
-        button {
-            background-color: #28a745;
-            color: white;
+
+        .bmi-calculator button {
+            background-color: #00a884;
+            color: #fff;
             padding: 10px;
             border: none;
             border-radius: 5px;
-            cursor: pointer;
             width: 100%;
+            cursor: pointer;
             font-size: 16px;
         }
-        button:hover {
-            background-color: #218838;
+
+        .bmi-calculator button:hover {
+            background-color: #008068;
         }
-        #result, #riskometer {
+
+        #bmiResult, #bmiRiskometer {
             margin-top: 20px;
             font-size: 16px;
             color: #333;
             line-height: 1.5;
         }
-        #result strong, #riskometer strong {
-            color: #007bff;
+
+        #bmiResult strong, #bmiRiskometer strong {
+            color: #00a884;
         }
-        .error {
+
+        #bmiError {
             color: red;
             font-size: 14px;
             margin-top: 10px;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar-icon img {
+                width: 20px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .bmi-calculator {
+                max-width: 100%;
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="calculator-container">
-        <h1>BMI Calculator</h1>
-        <form id="bmiForm">
-            <label for="weight">Weight (kg):</label>
-            <input type="number" id="weight" step="0.1" min="0" placeholder="Enter weight in kg" required>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-icon active" data-target="chat">
+            <img src="https://img.icons8.com/ios-filled/50/000000/chat.png" alt="Chat">
+        </div>
+        <div class="sidebar-icon" data-target="bmi">
+            <img src="https://img.icons8.com/ios-filled/50/000000/scale.png" alt="BMI">
+        </div>
+        <div class="sidebar-icon" data-target="status">
+            <img src="https://img.icons8.com/ios-filled/50/000000/instagram-stories.png" alt="Status">
+        </div>
+    </div>
 
-            <label for="heightFeet">Height (feet):</label>
-            <input type="number" id="heightFeet" min="0" placeholder="Enter feet" required>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1 id="header-title">Chat</h1>
+            <div class="header-icons">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/search.png" alt="Search">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/menu-2.png" alt="Menu">
+            </div>
+        </div>
 
-            <label for="heightInches">Height (inches):</label>
-            <input type="number" id="heightInches" min="0" max="11" placeholder="Enter inches" required>
+        <!-- Content Areas -->
+        <div class="content-area chat-area active" id="chat">
+            <div class="message received">Hey! How's it going?</div>
+            <div class="message sent">All good here! Just checking out this app.</div>
+            <div class="message received">Looks cool, right? Try the BMI calculator!</div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
 
-            <button type="submit">Calculate BMI</button>
-        </form>
-        <div id="result"></div>
-        <div id="riskometer"></div>
-        <div id="error" class="error"></div>
+        <div class="content-area" id="bmi">
+            <div class="bmi-calculator">
+                <h2>BMI Calculator</h2>
+                <form id="bmiForm">
+                    <label for="weight">Weight (kg):</label>
+                    <input type="number" id="weight" step="0.1" min="0" placeholder="Enter weight in kg" required>
+
+                    <label for="heightFeet">Height (feet):</label>
+                    <input type="number" id="heightFeet" min="0" placeholder="Enter feet" required>
+
+                    <label for="heightInches">Height (inches):</label>
+                    <input type="number" id="heightInches" min="0" max="11" placeholder="Enter inches" required>
+
+                    <button type="submit">Calculate BMI</button>
+                </form>
+                <div id="bmiResult"></div>
+                <div id="bmiRiskometer"></div>
+                <div id="bmiError"></div>
+            </div>
+        </div>
+
+        <div class="content-area" id="status">
+            <h2>Status Updates</h2>
+            <p>No status updates available.</p>
+        </div>
     </div>
 
     <script>
+        // Sidebar Navigation
+        const sidebarIcons = document.querySelectorAll('.sidebar-icon');
+        const contentAreas = document.querySelectorAll('.content-area');
+        const headerTitle = document.getElementById('header-title');
+
+        sidebarIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                // Remove active class from all icons and areas
+                sidebarIcons.forEach(i => i.classList.remove('active'));
+                contentAreas.forEach(area => area.classList.remove('active'));
+
+                // Add active class to clicked icon and corresponding area
+                icon.classList.add('active');
+                const target = icon.getAttribute('data-target');
+                document.getElementById(target).classList.add('active');
+
+                // Update header title
+                headerTitle.textContent = target === 'chat' ? 'Chat' : target === 'bmi' ? 'BMI Calculator' : 'Status';
+            });
+        });
+
+        // Chat Functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const messageText = input.value.trim();
+            if (messageText) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'sent');
+                messageDiv.textContent = messageText;
+                document.querySelector('.chat-area').insertBefore(messageDiv, document.querySelector('.chat-input'));
+                input.value = '';
+                // Auto-scroll to bottom
+                document.querySelector('.chat-area').scrollTop = document.querySelector('.chat-area').scrollHeight;
+            }
+        }
+
+        // BMI Calculator
         document.getElementById('bmiForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -100,9 +346,9 @@
             const weight = parseFloat(document.getElementById('weight').value);
             const heightFeet = parseInt(document.getElementById('heightFeet').value);
             const heightInches = parseInt(document.getElementById('heightInches').value);
-            const resultDiv = document.getElementById('result');
-            const riskometerDiv = document.getElementById('riskometer');
-            const errorDiv = document.getElementById('error');
+            const resultDiv = document.getElementById('bmiResult');
+            const riskometerDiv = document.getElementById('bmiRiskometer');
+            const errorDiv = document.getElementById('bmiError');
 
             // Clear previous messages
             resultDiv.innerHTML = '';
@@ -129,7 +375,7 @@
 
             // Convert height to meters
             const totalInches = (heightFeet * 12) + heightInches;
-            const heightMeters = totalInches * 0.0254; // 1 inch = 0.0254 meters
+            const heightMeters = totalInches * 0.0254;
 
             // Calculate BMI
             const bmi = weight / (heightMeters * heightMeters);
