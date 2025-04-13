@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .calculator-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>BMI Calculator</h1>
+        <form id="bmiForm">
+            <label for="weight">Weight (kg):</label>
+            <input type="number" id="weight" step="0.1" min="0" placeholder="Enter weight in kg" required>
+
+            <label for="heightFeet">Height (feet):</label>
+            <input type="number" id="heightFeet" min="0" placeholder="Enter feet" required>
+
+            <label for="heightInches">Height (inches):</label>
+            <input type="number" id="heightInches" min="0" max="11" placeholder="Enter inches" required>
+
+            <button type="submit">Calculate BMI</button>
+        </form>
+        <div id="result"></div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        document.getElementById('bmiForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get input values
+            const weight = parseFloat(document.getElementById('weight').value);
+            const heightFeet = parseInt(document.getElementById('heightFeet').value);
+            const heightInches = parseInt(document.getElementById('heightInches').value);
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+
+            // Clear previous messages
+            resultDiv.innerHTML = '';
+            errorDiv.innerHTML = '';
+
+            // Input validation
+            if (isNaN(weight) || weight <= 0) {
+                errorDiv.innerHTML = 'Please enter a valid weight greater than 0.';
+                return;
+            }
+            if (isNaN(heightFeet) || heightFeet < 0) {
+                errorDiv.innerHTML = 'Please enter a valid number of feet.';
+                return;
+            }
+            if (isNaN(heightInches) || heightInches < 0 || heightInches >= 12) {
+                errorDiv.innerHTML = 'Please enter inches between 0 and 11.';
+                return;
+            }
+            if (heightFeet === 0 && heightInches === 0) {
+                errorDiv.innerHTML = 'Height cannot be zero.';
+                return;
+            }
+
+            // Convert height to meters
+            const totalInches = (heightFeet * 12) + heightInches;
+            const heightMeters = totalInches * 0.0254; // 1 inch = 0.0254 meters
+
+            // Calculate BMI
+            const bmi = weight / (heightMeters * heightMeters);
+
+            // Determine BMI category
+            let category;
+            if (bmi < 18.5) {
+                category = 'Underweight';
+            } else if (bmi >= 18.5 && bmi < 25) {
+                category = 'Normal weight';
+            } else if (bmi >= 25 && bmi < 30) {
+                category = 'Overweight';
+            } else {
+                category = 'Obesity';
+            }
+
+            // Display result
+            resultDiv.innerHTML = `Your BMI is <strong>${bmi.toFixed(1)}</strong> (${category}).`;
+        });
+    </script>
+</body>
+</html>
