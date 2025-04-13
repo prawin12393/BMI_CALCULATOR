@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMI Calculator</title>
+    <title>BMI Calculator with Riskometer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,20 +11,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
         .calculator-container {
             background-color: #ffffff;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            width: 100%;
+            max-width: 350px;
             text-align: center;
         }
         h1 {
             font-size: 24px;
             color: #333;
+            margin-bottom: 20px;
         }
         label {
             display: block;
@@ -32,7 +35,7 @@
             font-weight: bold;
             color: #555;
         }
-        input, select {
+        input {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
@@ -53,15 +56,19 @@
         button:hover {
             background-color: #218838;
         }
-        #result {
+        #result, #riskometer {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 16px;
             color: #333;
+            line-height: 1.5;
+        }
+        #result strong, #riskometer strong {
+            color: #007bff;
         }
         .error {
             color: red;
             font-size: 14px;
-            margin-top: 5px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -81,6 +88,7 @@
             <button type="submit">Calculate BMI</button>
         </form>
         <div id="result"></div>
+        <div id="riskometer"></div>
         <div id="error" class="error"></div>
     </div>
 
@@ -93,10 +101,12 @@
             const heightFeet = parseInt(document.getElementById('heightFeet').value);
             const heightInches = parseInt(document.getElementById('heightInches').value);
             const resultDiv = document.getElementById('result');
+            const riskometerDiv = document.getElementById('riskometer');
             const errorDiv = document.getElementById('error');
 
             // Clear previous messages
             resultDiv.innerHTML = '';
+            riskometerDiv.innerHTML = '';
             errorDiv.innerHTML = '';
 
             // Input validation
@@ -136,8 +146,30 @@
                 category = 'Obesity';
             }
 
-            // Display result
+            // Display BMI result
             resultDiv.innerHTML = `Your BMI is <strong>${bmi.toFixed(1)}</strong> (${category}).`;
+
+            // Calculate normal weight range (BMI 18.5 to 24.9)
+            const minNormalWeight = 18.5 * (heightMeters * heightMeters);
+            const maxNormalWeight = 24.9 * (heightMeters * heightMeters);
+
+            // Riskometer logic
+            let riskMessage;
+            if (weight < minNormalWeight) {
+                const weightToGain = (minNormalWeight - weight).toFixed(1);
+                riskMessage = `You are <strong>${weightToGain} kg below</strong> the normal weight range.`;
+            } else if (weight > maxNormalWeight) {
+                const weightToLose = (weight - maxNormalWeight).toFixed(1);
+                riskMessage = `You are <strong>${weightToLose} kg above</strong> the normal weight range.`;
+            } else {
+                riskMessage = `Your weight is within the <strong>normal weight range</strong>.`;
+            }
+
+            // Display riskometer
+            riskometerDiv.innerHTML = `
+                <strong>Normal Weight Range:</strong> ${minNormalWeight.toFixed(1)} kg - ${maxNormalWeight.toFixed(1)} kg<br>
+                ${riskMessage}
+            `;
         });
     </script>
 </body>
