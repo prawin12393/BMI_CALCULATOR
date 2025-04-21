@@ -243,6 +243,9 @@
             <div class="chart-container">
                 <canvas id="fe550PriceChart"></canvas>
             </div>
+            <div class="chart-container">
+                <canvas id="steelCementCostChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -268,7 +271,7 @@
             3.00: { 'M15': 0.71, 'M20': 0.82, 'M25': 0.92, 'M30': 0.96, 'M35': 0.99, 'M40+': 1.01 }
         };
 
-        let priceChart, depthChart, cementPriceChart, fe415PriceChart, fe500PriceChart, fe550PriceChart;
+        let priceChart, depthChart, cementPriceChart, fe415PriceChart, fe500PriceChart, fe550PriceChart, steelCementCostChart;
 
         function calculateShearStrength(Asbd_100, grade) {
             let gradeKey = grade < 40 ? `M${grade}` : 'M40+';
@@ -414,7 +417,7 @@
                         let priceAggregate = Math.round((aggregateInTon * inputs.rateAggregate) * 100) / 100;
                         let totalPrice = Math.round((priceCement + priceSteel + priceSand + priceAggregate) * 100) / 100;
 
-                        tempResults.push([fck, fy, slabType, totalDepth, mulim, inputs.mainBarDia, adoptSpacingMain, inputs.distBarDia, adoptSpacingDist, shearCheck, totalSteelWeight, numCementBags, sandInTon, aggregateInTon, totalPrice]);
+                        tempResults.push([fck, fy, slabType, totalDepth, mulim, inputs.mainBarDia, adoptSpacingMain, inputs.distBarDia, adoptSpacingDist, shearCheck, totalSteelWeight, numCementBags, sandInTon, aggregateInTon, totalPrice, priceCement, priceSteel]);
                     }
                 }
                 return tempResults;
@@ -501,7 +504,7 @@
                 results.forEach(row => {
                     let isBestCost = row[14] === minPrice;
                     html += `<tr${isBestCost ? ' class="best-cost"' : ''}>` + 
-                        row.map((cell, i) => `<td${i === 9 ? ` class="${cell.toLowerCase()}"` : ''}>${cell}</td>`).join('') + 
+                        row.slice(0, 15).map((cell, i) => `<td${i === 9 ? ` class="${cell.toLowerCase()}"` : ''}>${cell}</td>`).join('') + 
                         '</tr>';
                 });
                 html += '</tbody></table>';
@@ -542,7 +545,7 @@
                 fe550Html += '</tbody></table>';
                 document.getElementById('fe550-price-table-container').innerHTML = fe550Html;
 
-                updateCharts(results, cementPriceResults, fe415PriceResults, fe500PriceResults, fe550PriceResults);
+                updateCharts(results, cementPriceResults, fe415PriceResults, fe500PriceResults, fe550PriceResults, inputs);
             }
             document.getElementById('table-container').innerHTML = html;
         }
@@ -554,9 +557,10 @@
             if (fe415PriceChart) fe415PriceChart.destroy();
             if (fe500PriceChart) fe500PriceChart.destroy();
             if (fe550PriceChart) fe550PriceChart.destroy();
+            if (steelCementCostChart) steelCementCostChart.destroy();
         }
 
-        function updateCharts(results, cementPriceResults, fe415PriceResults, fe500PriceResults, fe550PriceResults) {
+        function updateCharts(results, cementPriceResults, fe415PriceResults, fe500PriceResults, fe550PriceResults, inputs) {
             destroyCharts();
 
             // Scatter line diagram (Fck-Fy Combinations vs. Total Price)
@@ -842,6 +846,170 @@
                     },
                     elements: {
                         point: { radius: 5, hitRadius: 5, hoverRadius: 7 }
+                    }
+                }
+            });
+
+            // Combined Scatter Plot: Steel Grade vs Cement Grade with Cement Cost (Y2) and Steel Cost (X2)
+            const steelGrades = ['Fe415', 'Fe500', 'Fe550'];
+            const cementGrades = fckValues.map(fck => `M${fck}`);
+
+            // Combine data from all price tables
+            const combinedData = [];
+
+            // Process cementPriceResults
+            cementPriceResults.forEach(([cementPrice, combination, totalPrice]) => {
+                const [fck, fy] = combination.split('-').map(Number);
+                const steelIndex = fyValues.indexOf(fy);
+                const cementIndex = fckValues.indexOf(fck);
+                if (steelIndex >= 0 && cementIndex >= 0) {
+                    const steelCost = fy === 415 ? inputs.rateSteel415 : (fy === 500 ? inputs.rateSteel500 : inputs.rateSteel550);
+                    combinedData.push({
+                        steelGrade: steelGrades[steelIndex],
+                        cementGrade: cementGrades[cementIndex],
+                        steelIndex: steelIndex,
+                        cementIndex: cementIndex,
+                        cementCost: cementPrice,
+                        steelCost: steelCost,
+                        totalPrice: totalPrice,
+                        source: 'Cement Price'
+                    });
+                }
+            });
+
+            // Process fe415PriceResults
+            fe415PriceResults.forEach(([steelPrice, combination, totalPrice]) => {
+                const [fck, fy] = combination.split('-').map(Number);
+                const steelIndex = fyValues.indexOf(fy);
+                const cementIndex = fckValues.indexOf(fck);
+                if (steelIndex >= 0 && cementIndex >= 0 && fy === 415) {
+                    combinedData.push({
+                        steelGrade: steelGrades[steelIndex],
+                        cementGrade: cementGrades[cementIndex],
+                        steelIndex: steelIndex,
+                        cementIndex: cementIndex,
+                        cementCost: inputs.rateCement,
+                        steelCost: steelPrice,
+                        totalPrice: totalPrice,
+                        source: 'Fe415 Price'
+                    });
+                }
+            });
+
+            // Process fe500PriceResults
+            fe500PriceResults.forEach(([steelPrice, combination, totalPrice]) => {
+                const [fck, fy] = combination.split('-').map(Number);
+                const steelIndex = fyValues.indexOf(fy);
+                const cementIndex = fckValues.indexOf(fck);
+                if (steelIndex >= 0 && cementIndex >= 0 && fy === 500) {
+                    combinedData.push({
+                        steelGrade: steelGrades[steelIndex],
+                        cementGrade: cementGrades[cementIndex],
+                        steelIndex: steelIndex,
+                        cementIndex: cementIndex,
+                        cementCost: inputs.rateCement,
+                        steelCost: steelPrice,
+                        totalPrice: totalPrice,
+                        source: 'Fe500 Price'
+                    });
+                }
+            });
+
+            // Process fe550PriceResults
+            fe550PriceResults.forEach(([steelPrice, combination, totalPrice]) => {
+                const [fck, fy] = combination.split('-').map(Number);
+                const steelIndex = fyValues.indexOf(fy);
+                const cementIndex = fckValues.indexOf(fck);
+                if (steelIndex >= 0 && cementIndex >= 0 && fy === 550) {
+                    combinedData.push({
+                        steelGrade: steelGrades[steelIndex],
+                        cementGrade: cementGrades[cementIndex],
+                        steelIndex: steelIndex,
+                        cementIndex: cementIndex,
+                        cementCost: inputs.rateCement,
+                        steelCost: steelPrice,
+                        totalPrice: totalPrice,
+                        source: 'Fe550 Price'
+                    });
+                }
+            });
+
+            // Create unique steel costs for X2 axis
+            const uniqueSteelCosts = [...new Set(combinedData.map(d => d.steelCost))].sort((a, b) => a - b);
+            const steelCostToIndex = uniqueSteelCosts.reduce((map, cost, index) => {
+                map[cost] = index / (uniqueSteelCosts.length - 1) * (steelGrades.length - 1);
+                return map;
+            }, {});
+
+            const steelCementCostChartCtx = document.getElementById('steelCementCostChart').getContext('2d');
+            steelCementCostChart = new Chart(steelCementCostChartCtx, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'Combined Steel vs Cement Grades with Costs',
+                        data: combinedData.map(d => ({
+                            x: d.steelIndex,
+                            y: d.cementIndex,
+                            r: Math.min(d.totalPrice / 500, 20), // Bubble size based on total price, capped at 20
+                            steelCost: d.steelCost,
+                            cementCost: d.cementCost,
+                            totalPrice: d.totalPrice,
+                            source: d.source
+                        })),
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Steel Grade' },
+                            ticks: { callback: (value) => steelGrades[value], autoSkip: false },
+                            position: 'bottom'
+                        },
+                        x2: {
+                            title: { display: true, text: 'Steel Cost (INR per kg)' },
+                            ticks: { callback: (value) => uniqueSteelCosts[Math.round(value * (uniqueSteelCosts.length - 1) / (steelGrades.length - 1))] || '' },
+                            position: 'top',
+                            min: 0,
+                            max: steelGrades.length - 1,
+                            grid: { display: false }
+                        },
+                        y: {
+                            title: { display: true, text: 'Cement Grade' },
+                            ticks: { callback: (value) => cementGrades[value], autoSkip: false },
+                            position: 'left'
+                        },
+                        y2: {
+                            title: { display: true, text: 'Cement Cost (INR per 50kg bag)' },
+                            position: 'right',
+                            grid: { display: false },
+                            min: Math.min(...combinedData.map(d => d.cementCost)) * 0.9,
+                            max: Math.max(...combinedData.map(d => d.cementCost)) * 1.1
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Combined Steel Grade vs Cement Grade with Costs' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const data = context.raw;
+                                    return [
+                                        `Source: ${data.source}`,
+                                        `Steel Grade: ${combinedData[context.dataIndex].steelGrade}`,
+                                        `Cement Grade: ${combinedData[context.dataIndex].cementGrade}`,
+                                        `Cement Cost: ₹${data.cementCost.toFixed(2)}`,
+                                        `Steel Cost: ₹${data.steelCost.toFixed(2)}`,
+                                        `Total Price: ₹${data.totalPrice.toFixed(2)}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: { radius: (context) => context.raw.r, hitRadius: 10, hoverRadius: 12 }
                     }
                 }
             });
