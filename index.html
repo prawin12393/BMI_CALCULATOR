@@ -351,7 +351,7 @@
                         let deadLoadSlab = Math.round((totalDepth / 1000 * 25) * 100) / 100;
                         let deadLoadFloorFinish = Math.round(inputs.floorFinish * 100) / 100;
                         let totalDeadLoadSlab = Math.round((deadLoadSlab + deadLoadFloorFinish) * 100) / 100;
-                        let wu￼wu = Math.round((1.5 * (totalDeadLoadSlab + inputs.liveLoad)) * 100) / 100;
+                        let wu = Math.round((1.5 * (totalDeadLoadSlab + inputs.liveLoad)) * 100) / 100;
 
                         let mu = Math.round((wu * effectiveSpan * effectiveSpan / 8) * 100) / 100;
                         let vu = Math.round((wu * effectiveSpan / 2) * 100) / 100;
