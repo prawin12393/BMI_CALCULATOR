@@ -3,420 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatApp - BMI Calculator</title>
+    <title>Slab Design Calculator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-
         body {
-            background-color: #f0f2f5;
-            min-height: 100vh;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 70px;
-            background-color: #fff;
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 0;
-        }
-
-        .sidebar-icon {
-            width: 40px;
-            height: 40px;
-            margin: 10px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: background-color 0.2s;
-        }
-
-        .sidebar-icon:hover {
-            background-color: #f0f2f5;
-        }
-
-        .sidebar-icon.active {
-            background-color: #e8f0fe;
-        }
-
-        .sidebar-icon img {
-            width: 24px;
-            height: 24px;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header */
-        .header {
-            background-color: #00a884;
-            color: #fff;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header h1 {
-            font-size: 18px;
-            font-weight: 500;
-        }
-
-        .header-icons img {
-            width: 20px;
-            margin-left: 15px;
-            cursor: pointer;
-        }
-
-        /* Content Area */
-        .content-area {
-            flex: 1;
-            background-color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
             padding: 20px;
-            overflow-y: auto;
-            display: none;
+            background-color: #f4f4f9;
+            color: #333;
         }
-
-        .content-area.active {
-            display: block;
-        }
-
-        /* Chat Area */
-        .chat-area {
-            background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 20px;
-        }
-
-        .message {
-            max-width: 60%;
-            padding: 8px 12px;
-            margin: 5px 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .message.received {
-            background-color: #fff;
-            align-self: flex-start;
-        }
-
-        .message.sent {
-            background-color: #d9fdd3;
-            align-self: flex-end;
-        }
-
-        .chat-input {
-            display: flex;
-            padding: 10px;
-            background-color: #f0f2f5;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 20px;
-            background-color: #fff;
-            outline: none;
-            margin-right: 10px;
-        }
-
-        .chat-input button {
-            background-color: #00a884;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        .chat-input button:hover {
-            background-color: #008068;
-        }
-
-        /* BMI Calculator */
-        .bmi-calculator {
-            max-width: 400px;
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
-            background-color: #f9f9f9;
+            background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
-        .bmi-calculator h2 {
-            font-size: 20px;
+        h1 {
+            text-align: center;
+            color: #2c3e50;
             margin-bottom: 20px;
-            color: #333;
         }
-
-        .bmi-calculator label {
+        .input-section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .input-section summary {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+        }
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        .input-field {
+            position: relative;
+        }
+        .input-field label {
             display: block;
-            font-size: 14px;
-            margin: 10px 0 5px;
-            color: #555;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
-
-        .bmi-calculator input {
+        .input-field input {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            margin-bottom: 10px;
+            box-sizing: border-box;
         }
-
-        .bmi-calculator button {
-            background-color: #00a884;
-            color: #fff;
-            padding: 10px;
+        .input-field input:invalid {
+            border-color: #e74c3c;
+        }
+        .input-field .tooltip {
+            display: none;
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            z-index: 10;
+            bottom: 100%;
+            left: 0;
+        }
+        .input-field:hover .tooltip {
+            display: block;
+        }
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .buttons button {
+            padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            width: 100%;
+            background-color: #e74c3c;
+            color: white;
             cursor: pointer;
-            font-size: 16px;
         }
-
-        .bmi-calculator button:hover {
-            background-color: #008068;
+        .buttons button:hover {
+            background-color: #c0392b;
         }
-
-        #bmiResult, #bmiRiskometer {
+        #results {
+            overflow-x: auto;
+            position: relative;
+        }
+        #summary {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #d4efdf;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 20px;
-            font-size: 16px;
-            color: #333;
-            line-height: 1.5;
         }
-
-        #bmiResult strong, #bmiRiskometer strong {
-            color: #00a884;
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
         }
-
-        #bmiError {
-            color: red;
-            font-size: 14px;
-            margin-top: 10px;
+        th {
+            background-color: #3498db;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 5;
         }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 60px;
-            }
-
-            .sidebar-icon img {
-                width: 20px;
-            }
-
-            .header h1 {
-                font-size: 16px;
-            }
-
-            .bmi-calculator {
-                max-width: 100%;
-                padding: 15px;
-            }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr.best-cost {
+            background-color: #d4efdf !important;
+            font-weight: bold;
+        }
+        .safe {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .unsafe {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .chart-container {
+            margin-top: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-icon active" data-target="chat">
-            <img src="https://img.icons8.com/ios-filled/50/000000/chat.png" alt="Chat">
+    <div class="container">
+        <h1>Slab Design Calculator</h1>
+        <details class="input-section" open>
+            <summary>Slab Dimensions & Loads</summary>
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="longerSpan">Longer Span (m):</label>
+                    <input type="number" id="longerSpan" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                    <span class="tooltip">Length of the longer side of the slab</span>
+                </div>
+                <div class="input-field">
+                    <label for="shorterSpan">Shorter Span (m):</label>
+                    <input type="number" id="shorterSpan" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                    <span class="tooltip">Length of the shorter side of the slab</span>
+                </div>
+                <div class="input-field">
+                    <label for="liveLoad">Live Load (kN/m²):</label>
+                    <input type="number" id="liveLoad" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                    <span class="tooltip">Load due to occupancy (e.g., people, furniture)</span>
+                </div>
+                <div class="input-field">
+                    <label for="floorFinish">Floor Finish (kN/m²):</label>
+                    <input type="number" id="floorFinish" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                    <span class="tooltip">Load from flooring material</span>
+                </div>
+            </div>
+        </details>
+        <details class="input-section" open>
+            <summary>Reinforcement Details</summary>
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="mainBarDia">Main Bar Diameter (mm):</label>
+                    <input type="number" id="mainBarDia" min="6" required oninput="calculateSlabDesign()">
+                    <span class="tooltip">Diameter of main reinforcement bars</span>
+                </div>
+                <div class="input-field">
+                    <label for="distBarDia">Distribution Bar Diameter (mm):</label>
+                    <input type="number" id="distBarDia" min="6" required oninput="calculateSlabDesign()">
+                    <span class="tooltip">Diameter of distribution reinforcement bars</span>
+                </div>
+            </div>
+        </details>
+        <details class="input-section" open>
+            <summary>Material Rates</summary>
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="sandRate">Sand Rate (per ton):</label>
+                    <input type="number" id="sandRate" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                </div>
+                <div class="input-field">
+                    <label for="aggregateRate">Aggregate Rate (per ton):</label>
+                    <input type="number" id="aggregateRate" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                </div>
+                <div class="input-field">
+                    <label for="cementRate">Cement Rate (per 50kg bag):</label>
+                    <input type="number" id="cementRate" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                </div>
+                <div class="input-field">
+                    <label for="steelFe415Rate">Steel Fe415 Rate (per kg):</label>
+                    <input type="number" id="steelFe415Rate" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                </div>
+                <div class="input-field">
+                    <label for="steelFe500Rate">Steel Fe500 Rate (per kg):</label>
+                    <input type="number" id="steelFe500Rate" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                </div>
+                <div class="input-field">
+                    <label for="steelFe550Rate">Steel Fe550 Rate (per kg):</label>
+                    <input type="number" id="steelFe550Rate" step="0.01" min="0" required oninput="calculateSlabDesign()">
+                </div>
+            </div>
+        </details>
+        <div class="buttons">
+            <button id="resetBtn">Reset</button>
         </div>
-        <div class="sidebar-icon" data-target="bmi">
-            <img src="https://img.icons8.com/ios-filled/50/000000/scale.png" alt="BMI">
-        </div>
-        <div class="sidebar-icon" data-target="status">
-            <img src="https://img.icons8.com/ios-filled/50/000000/instagram-stories.png" alt="Status">
+        <div id="results">
+            <div id="summary"></div>
+            <div id="table-container"></div>
+            <div id="cement-price-table-container"></div>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="depthChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="cementPriceChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Header -->
-        <div class="header">
-            <h1 id="header-title">Chat</h1>
-            <div class="header-icons">
-                <img src="https://img.icons8.com/ios-filled/50/ffffff/search.png" alt="Search">
-                <img src="https://img.icons8.com/ios-filled/50/ffffff/menu-2.png" alt="Menu">
-            </div>
-        </div>
-
-        <!-- Content Areas -->
-        <div class="content-area chat-area active" id="chat">
-            <div class="message received">Hey! How's it going?</div>
-            <div class="message sent">All good here! Just checking out this app.</div>
-            <div class="message received">Looks cool, right? Try the BMI calculator!</div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Type a message...">
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-
-        <div class="content-area" id="bmi">
-            <div class="bmi-calculator">
-                <h2>BMI Calculator</h2>
-                <form id="bmiForm">
-                    <label for="weight">Weight (kg):</label>
-                    <input type="number" id="weight" step="0.1" min="0" placeholder="Enter weight in kg" required>
-
-                    <label for="heightFeet">Height (feet):</label>
-                    <input type="number" id="heightFeet" min="0" placeholder="Enter feet" required>
-
-                    <label for="heightInches">Height (inches):</label>
-                    <input type="number" id="heightInches" min="0" max="11" placeholder="Enter inches" required>
-
-                    <button type="submit">Calculate BMI</button>
-                </form>
-                <div id="bmiResult"></div>
-                <div id="bmiRiskometer"></div>
-                <div id="bmiError"></div>
-            </div>
-        </div>
-
-        <div class="content-area" id="status">
-            <h2>Status Updates</h2>
-            <p>No status updates available.</p>
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Sidebar Navigation
-        const sidebarIcons = document.querySelectorAll('.sidebar-icon');
-        const contentAreas = document.querySelectorAll('.content-area');
-        const headerTitle = document.getElementById('header-title');
+        const fckValues = [20, 25, 30];
+        const fyValues = [415, 500, 550];
+        const widthSupports = 0.23; // meters
+        const barWeights = { 8: 0.395, 10: 0.617, 12: 0.89, 16: 1.58 };
+        const tauTable = {
+            0.15: { 'M15': 0.28, 'M20': 0.28, 'M25': 0.29, 'M30': 0.29, 'M35': 0.29, 'M40+': 0.30 },
+            0.25: { 'M15': 0.35, 'M20': 0.36, 'M25': 0.36, 'M30': 0.37, 'M35': 0.37, 'M40+': 0.38 },
+            0.50: { 'M15': 0.46, 'M20': 0.48, 'M25': 0.49, 'M30': 0.50, 'M35': 0.50, 'M40+': 0.51 },
+            0.75: { 'M15': 0.54, 'M20': 0.56, 'M25': 0.57, 'M30': 0.59, 'M35': 0.59, 'M40+': 0.60 },
+            1.00: { 'M15': 0.60, 'M20': 0.62, 'M25': 0.64, 'M30': 0.66, 'M35': 0.67, 'M40+': 0.68 },
+            1.25: { 'M15': 0.64, 'M20': 0.67, 'M25': 0.70, 'M30': 0.71, 'M35': 0.73, 'M40+': 0.74 },
+            1.50: { 'M15': 0.68, 'M20': 0.72, 'M25': 0.74, 'M30': 0.76, 'M35': 0.78, 'M40+': 0.79 },
+            1.75: { 'M15': 0.71, 'M20': 0.75, 'M25': 0.78, 'M30': 0.80, 'M35': 0.82, 'M40+': 0.84 },
+            2.00: { 'M15': 0.71, 'M20': 0.79, 'M25': 0.82, 'M30': 0.84, 'M35': 0.86, 'M40+': 0.88 },
+            2.25: { 'M15': 0.71, 'M20': 0.81, 'M25': 0.85, 'M30': 0.88, 'M35': 0.90, 'M40+': 0.92 },
+            2.50: { 'M15': 0.71, 'M20': 0.82, 'M25': 0.88, 'M30': 0.91, 'M35': 0.93, 'M40+': 0.95 },
+            2.75: { 'M15': 0.71, 'M20': 0.82, 'M25': 0.90, 'M30': 0.94, 'M35': 0.96, 'M40+': 0.98 },
+            3.00: { 'M15': 0.71, 'M20': 0.82, 'M25': 0.92, 'M30': 0.96, 'M35': 0.99, 'M40+': 1.01 }
+        };
 
-        sidebarIcons.forEach(icon => {
-            icon.addEventListener('click', () => {
-                // Remove active class from all icons and areas
-                sidebarIcons.forEach(i => i.classList.remove('active'));
-                contentAreas.forEach(area => area.classList.remove('active'));
+        let priceChart, depthChart, cementPriceChart;
 
-                // Add active class to clicked icon and corresponding area
-                icon.classList.add('active');
-                const target = icon.getAttribute('data-target');
-                document.getElementById(target).classList.add('active');
-
-                // Update header title
-                headerTitle.textContent = target === 'chat' ? 'Chat' : target === 'bmi' ? 'BMI Calculator' : 'Status';
-            });
-        });
-
-        // Chat Functionality
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const messageText = input.value.trim();
-            if (messageText) {
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message', 'sent');
-                messageDiv.textContent = messageText;
-                document.querySelector('.chat-area').insertBefore(messageDiv, document.querySelector('.chat-input'));
-                input.value = '';
-                // Auto-scroll to bottom
-                document.querySelector('.chat-area').scrollTop = document.querySelector('.chat-area').scrollHeight;
+        function calculateShearStrength(Asbd_100, grade) {
+            let gradeKey = grade < 40 ? `M${grade}` : 'M40+';
+            if (Asbd_100 <= 0.15) return tauTable[0.15][gradeKey];
+            if (Asbd_100 >= 3.00) return tauTable[3.00][gradeKey];
+            let keys = Object.keys(tauTable).map(Number).sort((a, b) => a - b);
+            for (let i = 1; i < keys.length; i++) {
+                let lower = keys[i - 1], upper = keys[i];
+                if (lower < Asbd_100 && Asbd_100 < upper) {
+                    let tauLower = tauTable[lower][gradeKey];
+                    let tauUpper = tauTable[upper][gradeKey];
+                    return Number((tauLower + (Asbd_100 - lower) * (tauUpper - tauLower) / (upper - lower)).toFixed(3));
+                }
             }
+            return tauTable[Asbd_100][gradeKey];
         }
 
-        // BMI Calculator
-        document.getElementById('bmiForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+        function resetForm() {
+            document.querySelectorAll('.input-field input').forEach(input => input.value = '');
+            document.getElementById('table-container').innerHTML = '';
+            document.getElementById('cement-price-table-container').innerHTML = '';
+            document.getElementById('summary').innerHTML = '';
+            destroyCharts();
+        }
 
-            // Get input values
-            const weight = parseFloat(document.getElementById('weight').value);
-            const heightFeet = parseInt(document.getElementById('heightFeet').value);
-            const heightInches = parseInt(document.getElementById('heightInches').value);
-            const resultDiv = document.getElementById('bmiResult');
-            const riskometerDiv = document.getElementById('bmiRiskometer');
-            const errorDiv = document.getElementById('bmiError');
+        document.getElementById('resetBtn').addEventListener('click', resetForm);
 
-            // Clear previous messages
-            resultDiv.innerHTML = '';
-            riskometerDiv.innerHTML = '';
-            errorDiv.innerHTML = '';
+        function calculateSlabDesign() {
+            const inputs = {
+                longerSpan: Number(document.getElementById('longerSpan').value) || 0,
+                shorterSpan: Number(document.getElementById('shorterSpan').value) || 0,
+                liveLoad: Number(document.getElementById('liveLoad').value) || 0,
+                floorFinish: Number(document.getElementById('floorFinish').value) || 0,
+                mainBarDia: Number(document.getElementById('mainBarDia').value) || 0,
+                distBarDia: Number(document.getElementById('distBarDia').value) || 0,
+                rateSand: Number(document.getElementById('sandRate').value) || 0,
+                rateAggregate: Number(document.getElementById('aggregateRate').value) || 0,
+                rateCement: Number(document.getElementById('cementRate').value) || 0,
+                rateSteel415: Number(document.getElementById('steelFe415Rate').value) || 0,
+                rateSteel500: Number(document.getElementById('steelFe500Rate').value) || 0,
+                rateSteel550: Number(document.getElementById('steelFe550Rate').value) || 0
+            };
 
-            // Input validation
-            if (isNaN(weight) || weight <= 0) {
-                errorDiv.innerHTML = 'Please enter a valid weight greater than 0.';
+            if (Object.values(inputs).some(val => val <= 0)) {
+                document.getElementById('table-container').innerHTML = '<p>Please fill all fields with valid positive values.</p>';
+                document.getElementById('cement-price-table-container').innerHTML = '';
+                document.getElementById('summary').innerHTML = '';
+                destroyCharts();
                 return;
             }
-            if (isNaN(heightFeet) || heightFeet < 0) {
-                errorDiv.innerHTML = 'Please enter a valid number of feet.';
-                return;
-            }
-            if (isNaN(heightInches) || heightInches < 0 || heightInches >= 12) {
-                errorDiv.innerHTML = 'Please enter inches between 0 and 11.';
-                return;
-            }
-            if (heightFeet === 0 && heightInches === 0) {
-                errorDiv.innerHTML = 'Height cannot be zero.';
-                return;
+
+            let results = [];
+            let cementPriceResults = [];
+            const cementPrices = Array.from({length: (400 - 200) / 10 + 1}, (_, i) => 200 + i * 10);
+
+            for (let rateCement of cementPrices.concat([inputs.rateCement])) {
+                let tempResults = [];
+                for (let fck of fckValues) {
+                    for (let fy of fyValues) {
+                        let aspectRatio = inputs.longerSpan / inputs.shorterSpan;
+                        let slabType = aspectRatio > 2 ? "One Way" : "Two Way";
+                        let effectiveDepthD = 125;
+                        let effectiveCover = 25;
+                        let totalDepth = Math.round((effectiveDepthD + effectiveCover) * 100) / 100;
+
+                        let effectiveSpan = Math.round(Math.min(inputs.shorterSpan + effectiveDepthD / 1000, inputs.shorterSpan + widthSupports) * 100) / 100;
+                        let deadLoadSlab = Math.round((totalDepth / 1000 * 25) * 100) / 100;
+                        let deadLoadFloorFinish = Math.round(inputs.floorFinish * 100) / 100;
+                        let totalDeadLoadSlab = Math.round((deadLoadSlab + deadLoadFloorFinish) * 100) / 100;
+                        let wu = Math.round((1.5 * (totalDeadLoadSlab + inputs.liveLoad)) * 100) / 100;
+
+                        let mu = Math.round((wu * effectiveSpan * effectiveSpan / 8) * 100) / 100;
+                        let vu = Math.round((wu * effectiveSpan / 2) * 100) / 100;
+                        let mulim = fy === 415 ? 0.138 : (fy === 500 ? 0.133 : 0.130);
+                        mulim = Math.round((mulim * fck * 1000 * (effectiveDepthD * effectiveDepthD) / 1e6) * 100) / 100;
+
+                        if (mulim <= mu) continue;
+
+                        let astMain = Math.round((0.5 * fck / fy * (1 - Math.sqrt(1 - (4.6 * mu * 1e6) / (fck * 1000 * effectiveDepthD * effectiveDepthD))) * 1000 * effectiveDepthD) * 100) / 100;
+                        let astMin = Math.round((0.0012 * 1000 * totalDepth) * 100) / 100;
+
+                        let areaOneMainBar = Math.round((Math.PI / 4 * inputs.mainBarDia * inputs.mainBarDia) * 100) / 100;
+                        let spacingMainBar = Math.round((1000 * areaOneMainBar / astMain / 10)) * 10;
+                        let adoptSpacingMain = Math.floor(Math.min(3 * effectiveDepthD, 300, spacingMainBar) / 10) * 10;
+                        let astMainProvided = Math.round((1000 * areaOneMainBar / adoptSpacingMain) * 100) / 100;
+
+                        let areaOneDistBar = Math.round((Math.PI / 4 * inputs.distBarDia * inputs.distBarDia) * 100) / 100;
+                        let spacingDistBar = Math.ceil((1000 * areaOneDistBar / astMin / 10)) * 10;
+                        let adoptSpacingDist = Math.floor(Math.min(5 * effectiveDepthD, 450, spacingDistBar) / 10) * 10;
+                        let astDistProvided = Math.round((1000 * areaOneDistBar / adoptSpacingDist) * 100) / 100;
+
+                        let tv = Math.round((vu * 1000 / (1000 * effectiveDepthD)) * 100) / 100;
+                        let pt = Math.round((100 * astMainProvided / (1000 * effectiveDepthD)) * 100) / 100;
+                        let tauC = calculateShearStrength(pt, fck);
+                        let designShearStrength = Number((tauC * 1.30).toFixed(3));
+                        let shearCheck = tv > designShearStrength ? "Unsafe" : "Safe";
+                        if (shearCheck === "Unsafe") continue;
+
+                        let numMainBars = Math.ceil((inputs.longerSpan * 1000) / adoptSpacingMain) + 1;
+                        let mainSteelMeters = numMainBars * inputs.shorterSpan;
+                        let mainBarWeight = barWeights[inputs.mainBarDia] || 0.395;
+                        let mainBarKgs = mainSteelMeters * mainBarWeight;
+
+                        let numDistBars = Math.ceil((inputs.shorterSpan * 1000) / adoptSpacingDist) + 1;
+                        let distSteelMeters = numDistBars * inputs.longerSpan;
+                        let distBarWeight = barWeights[inputs.distBarDia] || 0.395;
+                        let distBarKgs = distSteelMeters * distBarWeight;
+
+                        let totalSteelWeight = Math.round((mainBarKgs + distBarKgs) * 100) / 100;
+
+                        let totalDepthM = Math.round((totalDepth / 1000) * 100) / 100;
+                        let volumeWetConcrete = Math.round((inputs.longerSpan * inputs.shorterSpan * totalDepthM) * 100) / 100;
+                        let volumeDryConcrete = Math.round((volumeWetConcrete * 1.54) * 100) / 100;
+
+                        let ratios = fck === 20 ? [1, 1.5, 3] : (fck === 25 ? [1, 1, 2] : [1, 0.75, 1.5]);
+                        let totalRatio = ratios.reduce((a, b) => a + b, 0);
+                        let volumeCement = Math.round((ratios[0] * volumeDryConcrete / totalRatio) * 100) / 100;
+                        let volumeSand = Math.round((ratios[1] * volumeDryConcrete / totalRatio) * 100) / 100;
+                        let volumeAggregate = Math.round((ratios[2] * volumeDryConcrete / totalRatio) * 100) / 100;
+
+                        let cementInKg = Math.round((volumeCement * 1440) * 100) / 100;
+                        let numCementBags = Math.round((cementInKg / 50) * 100) / 100;
+                        let sandInTon = Math.round((volumeSand * 1600 / 1000) * 100) / 100;
+                        let aggregateInTon = Math.round((volumeAggregate * 1450 / 1000) * 100) / 100;
+
+                        let priceCement = Math.round((numCementBags * rateCement) * 100) / 100;
+                        let steelRate = fy === 415 ? inputs.rateSteel415 : (fy === 500 ? inputs.rateSteel500 : inputs.rateSteel550);
+                        let priceSteel = Math.round((totalSteelWeight * steelRate) * 100) / 100;
+                        let priceSand = Math.round((sandInTon * inputs.rateSand) * 100) / 100;
+                        let priceAggregate = Math.round((aggregateInTon * inputs.rateAggregate) * 100) / 100;
+                        let totalPrice = Math.round((priceCement + priceSteel + priceSand + priceAggregate) * 100) / 100;
+
+                        tempResults.push([fck, fy, slabType, totalDepth, mulim, inputs.mainBarDia, adoptSpacingMain, inputs.distBarDia, adoptSpacingDist, shearCheck, totalSteelWeight, numCementBags, sandInTon, aggregateInTon, totalPrice]);
+                    }
+                }
+                if (rateCement === inputs.rateCement) {
+                    results = tempResults;
+                } else if (tempResults.length > 0) {
+                    let minPrice = Math.min(...tempResults.map(r => r[14]));
+                    let bestResult = tempResults.find(r => r[14] === minPrice);
+                    cementPriceResults.push([rateCement, `${bestResult[0]}-${bestResult[1]}`, minPrice]);
+                }
             }
 
-            // Convert height to meters
-            const totalInches = (heightFeet * 12) + heightInches;
-            const heightMeters = totalInches * 0.0254;
-
-            // Calculate BMI
-            const bmi = weight / (heightMeters * heightMeters);
-
-            // Determine BMI category
-            let category;
-            if (bmi < 18.5) {
-                category = 'Underweight';
-            } else if (bmi >= 18.5 && bmi < 25) {
-                category = 'Normal weight';
-            } else if (bmi >= 25 && bmi < 30) {
-                category = 'Overweight';
+            const columns = [
+                "Fck (N/mm²)",
+                "Fy (N/mm²)",
+                "Slab Type",
+                "Total Depth (mm)",
+                "Ultimate Moment (kNm)",
+                "Main Bar Dia (mm)",
+                "Main Bar Spacing (mm c/c)",
+                "Dist Bar Dia (mm)",
+                "Dist Bar Spacing (mm c/c)",
+                "Shear Check",
+                "Steel Weight (kg)",
+                "Cement Bags (50kg)",
+                "Sand (Ton)",
+                "Aggregate (Ton)",
+                "Total Price (INR)"
+            ];
+            let html = '<table><thead><tr>' + columns.map(col => `<th>${col}</th>`).join('') + '</tr></thead><tbody>';
+            if (results.length === 0) {
+                html += '<tr><td colspan="15">No valid designs found. Adjust inputs.</td></tr>';
+                document.getElementById('summary').innerHTML = '';
+                document.getElementById('cement-price-table-container').innerHTML = '';
+                destroyCharts();
             } else {
-                category = 'Obesity';
+                let minPrice = Math.min(...results.map(r => r[14]));
+                let bestResult = results.find(r => r[14] === minPrice);
+                document.getElementById('summary').innerHTML = `
+                    <h3>Best Design (Lowest Cost)</h3>
+                    <p>Fck: ${bestResult[0]} N/mm², Fy: ${bestResult[1]} N/mm², Total Price: ₹${bestResult[14]}</p>
+                    <p>Main Bars: ${bestResult[5]} mm @ ${bestResult[6]} mm c/c, Dist Bars: ${bestResult[7]} mm @ ${bestResult[8]} mm c/c</p>
+                    <p>Shear Check: <span class="${bestResult[9].toLowerCase()}">${bestResult[9]}</span></p>
+                `;
+                results.forEach(row => {
+                    let isBestCost = row[14] === minPrice;
+                    html += `<tr${isBestCost ? ' class="best-cost"' : ''}>` + 
+                        row.map((cell, i) => `<td${i === 9 ? ` class="${cell.toLowerCase()}"` : ''}>${cell}</td>`).join('') + 
+                        '</tr>';
+                });
+                html += '</tbody></table>';
+                
+                // Generate cement price table
+                const cementColumns = ["Cement Price (per 50kg bag)", "Minimum Combination (Fck-Fy)", "Total Price (INR)"];
+                let cementHtml = '<table><thead><tr>' + cementColumns.map(col => `<th>${col}</th>`).join('') + '</tr></thead><tbody>';
+                cementPriceResults.forEach(row => {
+                    cementHtml += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
+                });
+                cementHtml += '</tbody></table>';
+                document.getElementById('cement-price-table-container').innerHTML = cementHtml;
+
+                updateCharts(results, cementPriceResults);
             }
+            document.getElementById('table-container').innerHTML = html;
+        }
 
-            // Display BMI result
-            resultDiv.innerHTML = `Your BMI is <strong>${bmi.toFixed(1)}</strong> (${category}).`;
+        function destroyCharts() {
+            if (priceChart) priceChart.destroy();
+            if (depthChart) depthChart.destroy();
+            if (cementPriceChart) cementPriceChart.destroy();
+        }
 
-            // Calculate normal weight range (BMI 18.5 to 24.9)
-            const minNormalWeight = 18.5 * (heightMeters * heightMeters);
-            const maxNormalWeight = 24.9 * (heightMeters * heightMeters);
+        function updateCharts(results, cementPriceResults) {
+            destroyCharts();
 
-            // Riskometer logic
-            let riskMessage;
-            if (weight < minNormalWeight) {
-                const weightToGain = (minNormalWeight - weight).toFixed(1);
-                riskMessage = `You are <strong>${weightToGain} kg below</strong> the normal weight range.`;
-            } else if (weight > maxNormalWeight) {
-                const weightToLose = (weight - maxNormalWeight).toFixed(1);
-                riskMessage = `You are <strong>${weightToLose} kg above</strong> the normal weight range.`;
-            } else {
-                riskMessage = `Your weight is within the <strong>normal weight range</strong>.`;
-            }
+            // Prepare data for the scatter line diagram (Fck-Fy Combinations vs. Total Price)
+            const combinations = results.map(r => `${r[0]}-${r[1]}`);
+            const prices = results.map(r => r[14]);
 
-            // Display riskometer
-            riskometerDiv.innerHTML = `
-                <strong>Normal Weight Range:</strong> ${minNormalWeight.toFixed(1)} kg - ${maxNormalWeight.toFixed(1)} kg<br>
-                ${riskMessage}
-            `;
-        });
+            const priceChartCtx = document.getElementById('priceChart').getContext('2d');
+            priceChart = new Chart(priceChartCtx, {
+                type: 'scatter',
+                data: {
+                    labels: combinations,
+                    datasets: [{
+                        label: 'Total Price (INR)',
+                        data: prices.map((price, index) => ({ x: index, y: price })),
+                        borderColor: 'blue',
+                        backgroundColor: 'blue',
+                        pointRadius: 5,
+                        pointBackgroundColor: 'blue',
+                        fill: false,
+                        showLine: true,
+                        tension: 0.1,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Fck-Fy Combinations' },
+                            ticks: { callback: (value) => combinations[value], autoSkip: false }
+                        },
+                        y: {
+                            title: { display: true, text: 'Total Price (INR)' },
+                            beginAtZero: true,
+                            suggestedMax: Math.max(...prices) * 1.2
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Price vs. Fck-Fy Combinations' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    elements: {
+                        point: { radius: 5, hitRadius: 5, hoverRadius: 7 }
+                    }
+                }
+            });
+
+            // Prepare data for the bar graph (Depth vs. Ultimate Moment)
+            const depths = results.map(r => r[3]);
+            const moments = results.map(r => r[4]);
+
+            const depthChartCtx = document.getElementById('depthChart').getContext('2d');
+            depthChart = new Chart(depthChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: depths,
+                    datasets: [{
+                        label: 'Ultimate Moment of Resistance (kNm)',
+                        data: moments,
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Total Depth (mm)' } },
+                        y: { title: { display: true, text: 'Ultimate Moment (kNm)' }, beginAtZero: true }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Depth vs Ultimate Moment' },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+
+            // Prepare data for the cement price vs minimum combination scatter plot
+            const cementPrices = cementPriceResults.map(r => r[0]);
+            const minCombinations = cementPriceResults.map(r => r[1]);
+
+            const cementPriceChartCtx = document.getElementById('cementPriceChart').getContext('2d');
+            cementPriceChart = new Chart(cementPriceChartCtx, {
+                type: 'scatter',
+                data: {
+                    labels: minCombinations,
+                    datasets: [{
+                        label: 'Cement Price vs Minimum Combination',
+                        data: cementPriceResults.map((row, index) => ({ x: index, y: row[0] })),
+                        borderColor: 'green',
+                        backgroundColor: 'green',
+                        pointRadius: 5,
+                        pointBackgroundColor: 'green',
+                        fill: false,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Minimum Fck-Fy Combination' },
+                            ticks: { callback: (value) => minCombinations[value], autoSkip: false }
+                        },
+                        y: {
+                            title: { display: true, text: 'Cement Price (INR per 50kg bag)' },
+                            beginAtZero: false,
+                            min: 150,
+                            max: 450
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Cement Price vs Minimum Fck-Fy Combination' },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let index = context.dataIndex;
+                                    return `Cement Price: ₹${cementPriceResults[index][0]}, Combination: ${cementPriceResults[index][1]}, Total Price: ₹${cementPriceResults[index][2]}`;
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: { radius: 5, hitRadius: 5, hoverRadius: 7 }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
