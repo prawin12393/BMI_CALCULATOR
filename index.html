@@ -222,6 +222,9 @@
             <div id="summary"></div>
             <div id="table-container"></div>
             <div id="cement-price-table-container"></div>
+            <div id="fe415-price-table-container"></div>
+            <div id="fe500-price-table-container"></div>
+            <div id="fe550-price-table-container"></div>
             <div class="chart-container">
                 <canvas id="priceChart"></canvas>
             </div>
@@ -230,6 +233,15 @@
             </div>
             <div class="chart-container">
                 <canvas id="cementPriceChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="fe415PriceChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="fe500PriceChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="fe550PriceChart"></canvas>
             </div>
         </div>
     </div>
@@ -256,7 +268,7 @@
             3.00: { 'M15': 0.71, 'M20': 0.82, 'M25': 0.92, 'M30': 0.96, 'M35': 0.99, 'M40+': 1.01 }
         };
 
-        let priceChart, depthChart, cementPriceChart;
+        let priceChart, depthChart, cementPriceChart, fe415PriceChart, fe500PriceChart, fe550PriceChart;
 
         function calculateShearStrength(Asbd_100, grade) {
             let gradeKey = grade < 40 ? `M${grade}` : 'M40+';
@@ -278,6 +290,9 @@
             document.querySelectorAll('.input-field input').forEach(input => input.value = '');
             document.getElementById('table-container').innerHTML = '';
             document.getElementById('cement-price-table-container').innerHTML = '';
+            document.getElementById('fe415-price-table-container').innerHTML = '';
+            document.getElementById('fe500-price-table-container').innerHTML = '';
+            document.getElementById('fe550-price-table-container').innerHTML = '';
             document.getElementById('summary').innerHTML = '';
             destroyCharts();
         }
@@ -303,6 +318,9 @@
             if (Object.values(inputs).some(val => val <= 0)) {
                 document.getElementById('table-container').innerHTML = '<p>Please fill all fields with valid positive values.</p>';
                 document.getElementById('cement-price-table-container').innerHTML = '';
+                document.getElementById('fe415-price-table-container').innerHTML = '';
+                document.getElementById('fe500-price-table-container').innerHTML = '';
+                document.getElementById('fe550-price-table-container').innerHTML = '';
                 document.getElementById('summary').innerHTML = '';
                 destroyCharts();
                 return;
@@ -310,9 +328,16 @@
 
             let results = [];
             let cementPriceResults = [];
+            let fe415PriceResults = [];
+            let fe500PriceResults = [];
+            let fe550PriceResults = [];
             const cementPrices = Array.from({length: (400 - 200) / 10 + 1}, (_, i) => 200 + i * 10);
+            const fe415Prices = Array.from({length: (100 - 50) / 10 + 1}, (_, i) => 50 + i * 10);
+            const fe500Prices = Array.from({length: (110 - 60) / 10 + 1}, (_, i) => 60 + i * 10);
+            const fe550Prices = Array.from({length: (120 - 70) / 10 + 1}, (_, i) => 70 + i * 10);
 
-            for (let rateCement of cementPrices.concat([inputs.rateCement])) {
+            // Helper function to calculate slab design for given rates
+            function calculateForRates(rateCement, rateSteel415, rateSteel500, rateSteel550) {
                 let tempResults = [];
                 for (let fck of fckValues) {
                     for (let fy of fyValues) {
@@ -326,7 +351,7 @@
                         let deadLoadSlab = Math.round((totalDepth / 1000 * 25) * 100) / 100;
                         let deadLoadFloorFinish = Math.round(inputs.floorFinish * 100) / 100;
                         let totalDeadLoadSlab = Math.round((deadLoadSlab + deadLoadFloorFinish) * 100) / 100;
-                        let wu = Math.round((1.5 * (totalDeadLoadSlab + inputs.liveLoad)) * 100) / 100;
+                        let wu￼wu = Math.round((1.5 * (totalDeadLoadSlab + inputs.liveLoad)) * 100) / 100;
 
                         let mu = Math.round((wu * effectiveSpan * effectiveSpan / 8) * 100) / 100;
                         let vu = Math.round((wu * effectiveSpan / 2) * 100) / 100;
@@ -383,7 +408,7 @@
                         let aggregateInTon = Math.round((volumeAggregate * 1450 / 1000) * 100) / 100;
 
                         let priceCement = Math.round((numCementBags * rateCement) * 100) / 100;
-                        let steelRate = fy === 415 ? inputs.rateSteel415 : (fy === 500 ? inputs.rateSteel500 : inputs.rateSteel550);
+                        let steelRate = fy === 415 ? rateSteel415 : (fy === 500 ? rateSteel500 : rateSteel550);
                         let priceSteel = Math.round((totalSteelWeight * steelRate) * 100) / 100;
                         let priceSand = Math.round((sandInTon * inputs.rateSand) * 100) / 100;
                         let priceAggregate = Math.round((aggregateInTon * inputs.rateAggregate) * 100) / 100;
@@ -392,14 +417,51 @@
                         tempResults.push([fck, fy, slabType, totalDepth, mulim, inputs.mainBarDia, adoptSpacingMain, inputs.distBarDia, adoptSpacingDist, shearCheck, totalSteelWeight, numCementBags, sandInTon, aggregateInTon, totalPrice]);
                     }
                 }
-                if (rateCement === inputs.rateCement) {
-                    results = tempResults;
-                } else if (tempResults.length > 0) {
+                return tempResults;
+            }
+
+            // Calculate for cement prices
+            for (let rateCement of cementPrices) {
+                let tempResults = calculateForRates(rateCement, inputs.rateSteel415, inputs.rateSteel500, inputs.rateSteel550);
+                if (tempResults.length > 0) {
                     let minPrice = Math.min(...tempResults.map(r => r[14]));
                     let bestResult = tempResults.find(r => r[14] === minPrice);
                     cementPriceResults.push([rateCement, `${bestResult[0]}-${bestResult[1]}`, minPrice]);
                 }
             }
+
+            // Calculate for Fe415 prices
+            for (let rateSteel415 of fe415Prices) {
+                let tempResults = calculateForRates(inputs.rateCement, rateSteel415, inputs.rateSteel500, inputs.rateSteel550);
+                if (tempResults.length > 0) {
+                    let minPrice = Math.min(...tempResults.map(r => r[14]));
+                    let bestResult = tempResults.find(r => r[14] === minPrice);
+                    fe415PriceResults.push([rateSteel415, `${bestResult[0]}-${bestResult[1]}`, minPrice]);
+                }
+            }
+
+            // Calculate for Fe500 prices
+            for (let rateSteel500 of fe500Prices) {
+                let tempResults = calculateForRates(inputs.rateCement, inputs.rateSteel415, rateSteel500, inputs.rateSteel550);
+                if (tempResults.length > 0) {
+                    let minPrice = Math.min(...tempResults.map(r => r[14]));
+                    let bestResult = tempResults.find(r => r[14] === minPrice);
+                    fe500PriceResults.push([rateSteel500, `${bestResult[0]}-${bestResult[1]}`, minPrice]);
+                }
+            }
+
+            // Calculate for Fe550 prices
+            for (let rateSteel550 of fe550Prices) {
+                let tempResults = calculateForRates(inputs.rateCement, inputs.rateSteel415, inputs.rateSteel500, rateSteel550);
+                if (tempResults.length > 0) {
+                    let minPrice = Math.min(...tempResults.map(r => r[14]));
+                    let bestResult = tempResults.find(r => r[14] === minPrice);
+                    fe550PriceResults.push([rateSteel550, `${bestResult[0]}-${bestResult[1]}`, minPrice]);
+                }
+            }
+
+            // Calculate for user inputs
+            results = calculateForRates(inputs.rateCement, inputs.rateSteel415, inputs.rateSteel500, inputs.rateSteel550);
 
             const columns = [
                 "Fck (N/mm²)",
@@ -423,6 +485,9 @@
                 html += '<tr><td colspan="15">No valid designs found. Adjust inputs.</td></tr>';
                 document.getElementById('summary').innerHTML = '';
                 document.getElementById('cement-price-table-container').innerHTML = '';
+                document.getElementById('fe415-price-table-container').innerHTML = '';
+                document.getElementById('fe500-price-table-container').innerHTML = '';
+                document.getElementById('fe550-price-table-container').innerHTML = '';
                 destroyCharts();
             } else {
                 let minPrice = Math.min(...results.map(r => r[14]));
@@ -440,7 +505,7 @@
                         '</tr>';
                 });
                 html += '</tbody></table>';
-                
+
                 // Generate cement price table
                 const cementColumns = ["Cement Price (per 50kg bag)", "Minimum Combination (Fck-Fy)", "Total Price (INR)"];
                 let cementHtml = '<table><thead><tr>' + cementColumns.map(col => `<th>${col}</th>`).join('') + '</tr></thead><tbody>';
@@ -450,7 +515,34 @@
                 cementHtml += '</tbody></table>';
                 document.getElementById('cement-price-table-container').innerHTML = cementHtml;
 
-                updateCharts(results, cementPriceResults);
+                // Generate Fe415 price table
+                const fe415Columns = ["Fe415 Price (per kg)", "Minimum Combination (Fck-Fy)", "Total Price (INR)"];
+                let fe415Html = '<table><thead><tr>' + fe415Columns.map(col => `<th>${col}</th>`).join('') + '</tr></thead><tbody>';
+                fe415PriceResults.forEach(row => {
+                    fe415Html += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
+                });
+                fe415Html += '</tbody></table>';
+                document.getElementById('fe415-price-table-container').innerHTML = fe415Html;
+
+                // Generate Fe500 price table
+                const fe500Columns = ["Fe500 Price (per kg)", "Minimum Combination (Fck-Fy)", "Total Price (INR)"];
+                let fe500Html = '<table><thead><tr>' + fe500Columns.map(col => `<th>${col}</th>`).join('') + '</tr></thead><tbody>';
+                fe500PriceResults.forEach(row => {
+                    fe500Html += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
+                });
+                fe500Html += '</tbody></table>';
+                document.getElementById('fe500-price-table-container').innerHTML = fe500Html;
+
+                // Generate Fe550 price table
+                const fe550Columns = ["Fe550 Price (per kg)", "Minimum Combination (Fck-Fy)", "Total Price (INR)"];
+                let fe550Html = '<table><thead><tr>' + fe550Columns.map(col => `<th>${col}</th>`).join('') + '</tr></thead><tbody>';
+                fe550PriceResults.forEach(row => {
+                    fe550Html += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
+                });
+                fe550Html += '</tbody></table>';
+                document.getElementById('fe550-price-table-container').innerHTML = fe550Html;
+
+                updateCharts(results, cementPriceResults, fe415PriceResults, fe500PriceResults, fe550PriceResults);
             }
             document.getElementById('table-container').innerHTML = html;
         }
@@ -459,12 +551,15 @@
             if (priceChart) priceChart.destroy();
             if (depthChart) depthChart.destroy();
             if (cementPriceChart) cementPriceChart.destroy();
+            if (fe415PriceChart) fe415PriceChart.destroy();
+            if (fe500PriceChart) fe500PriceChart.destroy();
+            if (fe550PriceChart) fe550PriceChart.destroy();
         }
 
-        function updateCharts(results, cementPriceResults) {
+        function updateCharts(results, cementPriceResults, fe415PriceResults, fe500PriceResults, fe550PriceResults) {
             destroyCharts();
 
-            // Prepare data for the scatter line diagram (Fck-Fy Combinations vs. Total Price)
+            // Scatter line diagram (Fck-Fy Combinations vs. Total Price)
             const combinations = results.map(r => `${r[0]}-${r[1]}`);
             const prices = results.map(r => r[14]);
 
@@ -509,7 +604,7 @@
                 }
             });
 
-            // Prepare data for the bar graph (Depth vs. Ultimate Moment)
+            // Bar graph (Depth vs. Ultimate Moment)
             const depths = results.map(r => r[3]);
             const moments = results.map(r => r[4]);
 
@@ -539,15 +634,15 @@
                 }
             });
 
-            // Prepare data for the cement price vs minimum combination scatter plot
+            // Cement price vs minimum combination scatter plot
             const cementPrices = cementPriceResults.map(r => r[0]);
-            const minCombinations = cementPriceResults.map(r => r[1]);
+            const cementMinCombinations = cementPriceResults.map(r => r[1]);
 
             const cementPriceChartCtx = document.getElementById('cementPriceChart').getContext('2d');
             cementPriceChart = new Chart(cementPriceChartCtx, {
                 type: 'scatter',
                 data: {
-                    labels: minCombinations,
+                    labels: cementMinCombinations,
                     datasets: [{
                         label: 'Cement Price vs Minimum Combination',
                         data: cementPriceResults.map((row, index) => ({ x: index, y: row[0] })),
@@ -564,7 +659,7 @@
                     scales: {
                         x: {
                             title: { display: true, text: 'Minimum Fck-Fy Combination' },
-                            ticks: { callback: (value) => minCombinations[value], autoSkip: false }
+                            ticks: { callback: (value) => cementMinCombinations[value], autoSkip: false }
                         },
                         y: {
                             title: { display: true, text: 'Cement Price (INR per 50kg bag)' },
@@ -582,6 +677,165 @@
                                 label: function(context) {
                                     let index = context.dataIndex;
                                     return `Cement Price: ₹${cementPriceResults[index][0]}, Combination: ${cementPriceResults[index][1]}, Total Price: ₹${cementPriceResults[index][2]}`;
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: { radius: 5, hitRadius: 5, hoverRadius: 7 }
+                    }
+                }
+            });
+
+            // Fe415 price vs minimum combination scatter plot
+            const fe415Prices = fe415PriceResults.map(r => r[0]);
+            const fe415MinCombinations = fe415PriceResults.map(r => r[1]);
+
+            const fe415PriceChartCtx = document.getElementById('fe415PriceChart').getContext('2d');
+            fe415PriceChart = new Chart(fe415PriceChartCtx, {
+                type: 'scatter',
+                data: {
+                    labels: fe415MinCombinations,
+                    datasets: [{
+                        label: 'Fe415 Price vs Minimum Combination',
+                        data: fe415PriceResults.map((row, index) => ({ x: index, y: row[0] })),
+                        borderColor: 'purple',
+                        backgroundColor: 'purple',
+                        pointRadius: 5,
+                        pointBackgroundColor: 'purple',
+                        fill: false,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Minimum Fck-Fy Combination' },
+                            ticks: { callback: (value) => fe415MinCombinations[value], autoSkip: false }
+                        },
+                        y: {
+                            title: { display: true, text: 'Fe415 Price (INR per kg)' },
+                            beginAtZero: false,
+                            min: 40,
+                            max: 110
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Fe415 Price vs Minimum Fck-Fy Combination' },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let index = context.dataIndex;
+                                    return `Fe415 Price: ₹${fe415PriceResults[index][0]}, Combination: ${fe415PriceResults[index][1]}, Total Price: ₹${fe415PriceResults[index][2]}`;
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: { radius: 5, hitRadius: 5, hoverRadius: 7 }
+                    }
+                }
+            });
+
+            // Fe500 price vs minimum combination scatter plot
+            const fe500Prices = fe500PriceResults.map(r => r[0]);
+            const fe500MinCombinations = fe500PriceResults.map(r => r[1]);
+
+            const fe500PriceChartCtx = document.getElementById('fe500PriceChart').getContext('2d');
+            fe500PriceChart = new Chart(fe500PriceChartCtx, {
+                type: 'scatter',
+                data: {
+                    labels: fe500MinCombinations,
+                    datasets: [{
+                        label: 'Fe500 Price vs Minimum Combination',
+                        data: fe500PriceResults.map((row, index) => ({ x: index, y: row[0] })),
+                        borderColor: 'orange',
+                        backgroundColor: 'orange',
+                        pointRadius: 5,
+                        pointBackgroundColor: 'orange',
+                        fill: false,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Minimum Fck-Fy Combination' },
+                            ticks: { callback: (value) => fe500MinCombinations[value], autoSkip: false }
+                        },
+                        y: {
+                            title: { display: true, text: 'Fe500 Price (INR per kg)' },
+                            beginAtZero: false,
+                            min: 50,
+                            max: 120
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Fe500 Price vs Minimum Fck-Fy Combination' },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let index = context.dataIndex;
+                                    return `Fe500 Price: ₹${fe500PriceResults[index][0]}, Combination: ${fe500PriceResults[index][1]}, Total Price: ₹${fe500PriceResults[index][2]}`;
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: { radius: 5, hitRadius: 5, hoverRadius: 7 }
+                    }
+                }
+            });
+
+            // Fe550 price vs minimum combination scatter plot
+            const fe550Prices = fe550PriceResults.map(r => r[0]);
+            const fe550MinCombinations = fe550PriceResults.map(r => r[1]);
+
+            const fe550PriceChartCtx = document.getElementById('fe550PriceChart').getContext('2d');
+            fe550PriceChart = new Chart(fe550PriceChartCtx, {
+                type: 'scatter',
+                data: {
+                    labels: fe550MinCombinations,
+                    datasets: [{
+                        label: 'Fe550 Price vs Minimum Combination',
+                        data: fe550PriceResults.map((row, index) => ({ x: index, y: row[0] })),
+                        borderColor: 'red',
+                        backgroundColor: 'red',
+                        pointRadius: 5,
+                        pointBackgroundColor: 'red',
+                        fill: false,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Minimum Fck-Fy Combination' },
+                            ticks: { callback: (value) => fe550MinCombinations[value], autoSkip: false }
+                        },
+                        y: {
+                            title: { display: true, text: 'Fe550 Price (INR per kg)' },
+                            beginAtZero: false,
+                            min: 60,
+                            max: 130
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Fe550 Price vs Minimum Fck-Fy Combination' },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let index = context.dataIndex;
+                                    return `Fe550 Price: ₹${fe550PriceResults[index][0]}, Combination: ${fe550PriceResults[index][1]}, Total Price: ₹${fe550PriceResults[index][2]}`;
                                 }
                             }
                         }
